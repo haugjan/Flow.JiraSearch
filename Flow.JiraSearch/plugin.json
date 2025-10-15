@@ -1,0 +1,16 @@
+{
+  "ID": "Flow.JiraSearch",
+  "ActionKeywords": [
+    "jira"
+  ],
+  "Name": "Jira Search",
+  "Description": "Search for and open Jira issues directly from Flow Launcher.",
+  "Author": "Jan Haug",
+  "Version": "1.1.0",
+  "Language": "csharp",
+  "Website": "https://www.atlassian.com/software/jira",
+  "IcoPath": "Images/icon.png",
+  "ExecuteFileName": "Flow.JiraSearch.dll",
+  "Disabled": false,
+  "MinFlowLauncherVersion": "1.15.0"
+}
