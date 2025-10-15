@@ -2,7 +2,7 @@ name: Build Pull Request
 
 on:
   pull_request:
-    paths-ignore: 
+    paths-ignore:
       - .github/workflows/*
       - .gitignore
       - idea/*
@@ -13,23 +13,30 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-      - name: get version
+
+      - name: Read version from plugin.json
         id: version
         uses: notiz-dev/github-action-json-property@release
-        with: 
-          path: 'plugin.json'
-          prop_path: 'Version'
-      - run: echo ${{steps.version.outputs.prop}}
-      - name: Build
-        run: |
-          dotnet publish 'Flow.JiraSearch/Flow.JiraSearch.csproj' -c Release -r win-x64 --no-self-contained -o "JiraSearch-${{steps.version.outputs.prop}}"
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
         with:
-          name: 'JiraSearch-${{steps.version.outputs.prop}}'
-          path: 'JiraSearch-${{steps.version.outputs.prop}}'
+          path: plugin.json
+          prop_path: Version
+
+      - name: Show version
+        run: echo ${{ steps.version.outputs.prop }}
+
+      - name: Build
+        run: dotnet publish "Flow.JiraSearch/Flow.JiraSearch.csproj" -c Release -r win-x64 --no-self-contained -o "JiraSearch-${{ steps.version.outputs.prop }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: JiraSearch-${{ steps.version.outputs.prop }}
+          path: JiraSearch-${{ steps.version.outputs.prop }}
+          if-no-files-found: error
+          retention-days: 14
