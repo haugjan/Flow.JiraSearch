@@ -25,7 +25,7 @@ jobs:
         id: version
         uses: notiz-dev/github-action-json-property@release
         with:
-          path: plugin.json
+          path: Flow.JiraSearch/plugin.json
           prop_path: Version
 
       - name: Show version
