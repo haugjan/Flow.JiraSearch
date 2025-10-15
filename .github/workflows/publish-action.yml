@@ -52,7 +52,7 @@ jobs:
       - name: Build
         run: |
           dotnet publish 'Flow.JiraSearch/Flow.JiraSearch.csproj' -r win-x64  -c Release -o "Flow.JiraSearch"
-          7z a -tzip "JiraSearch-${{steps.version.outputs.prop}}.zip" "./Flow.JiraSearch/*"
+          7z a -tzip "JiraSearch-${{steps.version.outputs.prop}}.zip" "./Flow.JiraSearch/bin/Release/net9.0-windows/*"
       - name: Publish
         uses: softprops/action-gh-release@v1
         if: steps.publish-release.outputs.required == 'true'
