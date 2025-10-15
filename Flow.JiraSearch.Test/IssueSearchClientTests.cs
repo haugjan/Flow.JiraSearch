@@ -16,7 +16,6 @@ public class IssueSearchClientTests : IDisposable
         _httpMessageHandler = new TestHttpMessageHandler();
         _httpClient = new HttpClient(_httpMessageHandler)
         {
-            // BaseAddress für relative URIs setzen
             BaseAddress = new Uri("https://test.atlassian.net/"),
         };
         var httpFactory = () => _httpClient;
@@ -123,7 +122,6 @@ public class IssueSearchClientTests : IDisposable
         ShouldBeNullExtensions.ShouldNotBeNull<HttpRequestMessage>(request);
         ShouldBeTestExtensions.ShouldBe(request.Method, HttpMethod.Post);
 
-        // Vollständige URI prüfen (BaseAddress + relative URI)
         ShouldBeNullExtensions.ShouldNotBeNull<Uri>(request.RequestUri);
         ShouldBeStringTestExtensions.ShouldBe(request.RequestUri.ToString(), "https://test.atlassian.net/rest/api/2/search/jql");
 
