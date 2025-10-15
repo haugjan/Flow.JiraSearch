@@ -57,7 +57,6 @@ jobs:
           powershell -NoProfile -Command "Compress-Archive -Path $out\* -DestinationPath 'JiraSearch-${{ steps.version.outputs.prop }}.zip' -Force"
 
       - name: Publish GitHub Release
-        if: steps.gate.outputs.required == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.prop }}
