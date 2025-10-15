@@ -1,13 +1,10 @@
-﻿// Tests/JiraClient/IssueSearchClientTests.cs
-using System.Net;
-using System.Net.Http;
+﻿using System.Net;
 using System.Text;
 using System.Text.Json;
 using Flow.JiraSearch.JiraClient;
 using Shouldly;
-using Xunit;
 
-namespace Flow.JiraSearch.Tests.JiraClient;
+namespace Flow.JiraSearch.Test;
 
 public class IssueSearchClientTests : IDisposable
 {
@@ -125,15 +122,15 @@ public class IssueSearchClientTests : IDisposable
 
         // Assert
         var request = _httpMessageHandler.LastRequest;
-        request.ShouldNotBeNull();
-        request.Method.ShouldBe(HttpMethod.Post);
+        ShouldBeNullExtensions.ShouldNotBeNull<HttpRequestMessage>(request);
+        ShouldBeTestExtensions.ShouldBe(request.Method, HttpMethod.Post);
 
         // Vollständige URI prüfen (BaseAddress + relative URI)
-        request.RequestUri.ShouldNotBeNull();
-        request.RequestUri.ToString().ShouldBe("https://test.atlassian.net/rest/api/2/search/jql");
+        ShouldBeNullExtensions.ShouldNotBeNull<Uri>(request.RequestUri);
+        ShouldBeStringTestExtensions.ShouldBe(request.RequestUri.ToString(), "https://test.atlassian.net/rest/api/2/search/jql");
 
         var requestBody = _httpMessageHandler.LastRequestBody;
-        requestBody.ShouldNotBeNull();
+        ShouldBeNullExtensions.ShouldNotBeNull<string>(requestBody);
 
         var requestJson = JsonDocument.Parse(requestBody);
 
@@ -228,7 +225,7 @@ public class IssueSearchClientTests : IDisposable
 
         // Assert
         result.ShouldNotBeNull();
-        _httpMessageHandler.RequestCount.ShouldBe(1);
+        ShouldBeTestExtensions.ShouldBe(_httpMessageHandler.RequestCount, 1);
     }
 
     [Fact]
@@ -263,44 +260,5 @@ public class IssueSearchClientTests : IDisposable
         _httpClient?.Dispose();
         _httpMessageHandler?.Dispose();
         GC.SuppressFinalize(this);
-    }
-}
-
-// Test Helper Class (unverändert)
-public class TestHttpMessageHandler : HttpMessageHandler
-{
-    private HttpStatusCode _statusCode = HttpStatusCode.OK;
-    private string _responseContent = "";
-
-    public HttpRequestMessage? LastRequest { get; private set; }
-    public string? LastRequestBody { get; private set; }
-    public int RequestCount { get; private set; }
-
-    public void SetResponse(HttpStatusCode statusCode, string content)
-    {
-        _statusCode = statusCode;
-        _responseContent = content;
-    }
-
-    protected override async Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken
-    )
-    {
-        RequestCount++;
-        LastRequest = request;
-
-        // Request Body lesen (falls vorhanden)
-        if (request.Content != null)
-        {
-            LastRequestBody = await request.Content.ReadAsStringAsync(cancellationToken);
-        }
-
-        var response = new HttpResponseMessage(_statusCode)
-        {
-            Content = new StringContent(_responseContent, Encoding.UTF8, "application/json"),
-        };
-
-        return response;
     }
 }
