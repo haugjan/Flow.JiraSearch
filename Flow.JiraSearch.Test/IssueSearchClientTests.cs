@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Text;
 using System.Text.Json;
 using Flow.JiraSearch.JiraClient;
 using Shouldly;
@@ -10,7 +9,6 @@ public class IssueSearchClientTests : IDisposable
 {
     private readonly TestHttpMessageHandler _httpMessageHandler;
     private readonly HttpClient _httpClient;
-    private readonly Func<HttpClient> _httpFactory;
     private readonly IssueSearchClient _sut;
 
     public IssueSearchClientTests()
@@ -21,8 +19,8 @@ public class IssueSearchClientTests : IDisposable
             // BaseAddress für relative URIs setzen
             BaseAddress = new Uri("https://test.atlassian.net/"),
         };
-        _httpFactory = () => _httpClient;
-        _sut = new IssueSearchClient(_httpFactory);
+        var httpFactory = () => _httpClient;
+        _sut = new IssueSearchClient(httpFactory);
     }
 
     [Fact]
