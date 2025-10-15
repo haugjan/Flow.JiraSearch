@@ -3,11 +3,11 @@ name: Publish Release
 on:
   push:
     branches: [ master ]
-    paths-ignore: 
+    paths-ignore:
       - .github/workflows/*
       - .gitignore
       - idea/*
-      - dist
+      - dist/**
   workflow_dispatch:
 
 permissions:
@@ -16,49 +16,52 @@ permissions:
 jobs:
   publish:
     runs-on: windows-latest
-    
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - name: Fetch latest release version
-        id: fetch-latest-release
+        id: latest
         uses: reloc8/action-latest-release-version@1.0.0
-      - name: Get updated version
-        id: updated-version
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: 'Flow.JiraSearch/plugin.json'
-          prop_path: 'Version'
-      - name: Determine if publish release required
-        id: publish-release
-        run: |
-          $updated_ver="${{steps.updated-version.outputs.prop}}"
-          $release_ver="${{ steps.fetch-latest-release.outputs.latest-release }}".replace('v','')
-          if ($updated_ver -ne $release_ver -and "${{github.ref_name}}" -eq 'master') {
-            echo "::set-output name=required::true"
-          }
-          echo "Updated version is $updated_ver"
-          echo "Release version is $release_ver"
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 9.0.x
-      - name: Get version
+
+      - name: Read version from plugin.json
         id: version
         uses: notiz-dev/github-action-json-property@release
-        with: 
-          path: 'Flow.JiraSearch/plugin.json'
-          prop_path: 'Version'
-      - run: echo ${{steps.version.outputs.prop}}
-      - name: Build
-        run: |
-          dotnet publish 'Flow.JiraSearch/Flow.JiraSearch.csproj' -r win-x64  -c Release -o "Flow.JiraSearch"
-          7z a -tzip "JiraSearch-${{steps.version.outputs.prop}}.zip" "./Flow.JiraSearch/bin/Release/net9.0-windows/*"
-      - name: Publish
-        uses: softprops/action-gh-release@v1
-        if: steps.publish-release.outputs.required == 'true'
         with:
-          files: "JiraSearch-${{steps.version.outputs.prop}}.zip"
-          tag_name: "v${{steps.version.outputs.prop}}"
+          path: Flow.JiraSearch/plugin.json
+          prop_path: Version
+
+      - name: Decide if release is required
+        id: gate
+        shell: pwsh
+        run: |
+          $updated = '${{ steps.version.outputs.prop }}'
+          $latest = '${{ steps.latest.outputs.latest-release }}'
+          if ([string]::IsNullOrWhiteSpace($latest)) { $latest = '' }
+          $latest = $latest -replace '^v',''
+          $required = ($updated -ne $latest)
+          "required=$required" >> $env:GITHUB_OUTPUT
+          "updated=$updated"   >> $env:GITHUB_OUTPUT
+          "latest=$latest"     >> $env:GITHUB_OUTPUT
+          Write-Host "Updated: $updated  Latest: $latest  Required: $required"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Build (publish)
+        run: |
+          $out = "out/JiraSearch-${{ steps.version.outputs.prop }}"
+          dotnet publish "Flow.JiraSearch/Flow.JiraSearch.csproj" -c Release -r win-x64 --no-self-contained -o "$out"
+          powershell -NoProfile -Command "Compress-Archive -Path $out\* -DestinationPath 'JiraSearch-${{ steps.version.outputs.prop }}.zip' -Force"
+
+      - name: Publish GitHub Release
+        if: steps.gate.outputs.required == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.prop }}
+          name: v${{ steps.version.outputs.prop }}
+          files: JiraSearch-${{ steps.version.outputs.prop }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
