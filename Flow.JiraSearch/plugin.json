@@ -8,9 +8,8 @@
   "Author": "Jan Haug",
   "Version": "1.1.0",
   "Language": "csharp",
-  "Website": "https://www.atlassian.com/software/jira",
+  "Website": "https://github.com/haugjan/Flow.JiraSearch",
   "IcoPath": "Images/icon.png",
   "ExecuteFileName": "Flow.JiraSearch.dll",
-  "Disabled": false,
   "MinFlowLauncherVersion": "1.15.0"
 }
