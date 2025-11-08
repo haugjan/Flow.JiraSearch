@@ -31,7 +31,7 @@ internal class IssueQueryBuilder(IUserSearchClient userSearchClient) : IIssueQue
             .When("\\?")
             .Then("statusCategory = \"In Progress\"")
             .When("\\*")
-            .ThenDoNothing() // tut nichts, aber resetet den Match-State
+            .ThenDoNothing() // does nothing, but resets the match state
             .Else("statusCategory != Done")
             .When(@"@\?")
             .Then("assignee IS EMPTY")
