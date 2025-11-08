@@ -201,12 +201,12 @@ If you configure default projects in the settings, searches will automatically b
 
 ## Search Operators Reference
 
-Below is a compact reference of the query operators supported by the plugin. Combine operators freely in a single query (for example: `jira #sup @me +critical`). If `Default Projects` is set in the plugin settings, queries without an explicit `#project` or `#all` are limited to those projects.
+This is a concise reference for all query operators supported by the plugin. Tokens can be combined in any order; the query builder composes them into a JQL query. If you set `Default Projects` in plugin settings, queries without `#projectkey` or `#all` will be limited to those projects.
 
-| Operator | Meaning | Example |
-|----------|---------|---------|
+| Operator | What it does | Example |
+|----------|--------------|---------|
 | `@me` | Issues currently assigned to the signed-in user | `jira @me` |
-| `@username` | Issues currently assigned to the named user (e.g. `@john`). The plugin will attempt to resolve the name via Jira user search and use matching account IDs. | `jira @john` |
+| `@username` | Issues currently assigned to the named user. Names support letters (Unicode) and hyphens; the plugin resolves names via Jira user search and uses matching account IDs (limited). | `jira @john` |
 | `@reporter:me` | Issues where the signed-in user is the reporter | `jira @reporter:me` |
 | `@reporter:username` | Issues reported by the specified user | `jira @reporter:alice` |
 | `@was:me` | Issues that were previously assigned to the signed-in user (`assignee WAS`) | `jira @was:me` |
@@ -214,18 +214,19 @@ Below is a compact reference of the query operators supported by the plugin. Com
 | `@?` | Unassigned issues (no current assignee) | `jira @?` |
 | `#projectkey` | Restrict search to a specific project (project key, e.g. `#sup`) | `jira #sup` |
 | `#all` | Search across all projects (overrides `Default Projects`) | `jira #all` |
-| `+labelname` | Require a label; use multiple `+label` tokens to require multiple labels | `jira +bug +urgent` |
-| `*` | Include all statuses (open and closed). By default closed/Done issues are excluded. | `jira *` |
+| `+labelname` | Require a label. Use multiple `+label` tokens to require multiple labels. Labels use letters and numbers. | `jira +bug +urgent` |
+| `*` | Include all statuses (open and closed). If omitted, closed/Done issues are excluded by default. | `jira *` |
 | `!` | Only closed/completed issues (status category Done) | `jira !` |
-| `PROJECT-123` | Exact issue key lookup | `jira WEB-456` |
-| free text | Any other words are used as text search (summary OR text) | `jira authentication login`
+| `?` | Only issues in progress (status category "In Progress") | `jira ?` |
+| `PROJECT-123` | Exact issue key lookup (pattern: uppercase project key, dash, number) | `jira WEB-456` |
+| free text | Any other words are used as a text search (summary OR text) | `jira authentication login`
 
 Notes:
 
-- Order does not matter; tokens are combined into a JQL query by the query builder.
-- Username tokens support letters and hyphens; the user search may return multiple account IDs — the plugin will use matched account IDs (limited to a small number) when resolving a name.
-- Use `#all` when you want to ignore `Default Projects` and search globally.
-- Combine status operators with other tokens: `!` restricts to closed issues, whereas `*` keeps every status.
+- The `?` operator (In Progress) is supported by the query builder and filters by `statusCategory = "In Progress"`.
+- Username resolution may return multiple account IDs; the plugin will include the matched IDs (bounded) in the JQL `IN` clause.
+- The `#all` token overrides `Default Projects`. To search across default projects, omit `#projectkey` and `#all`.
+- Issue key matching follows the pattern used in the builder; use the exact key to directly find a single issue.
 
 ## Troubleshooting
 
