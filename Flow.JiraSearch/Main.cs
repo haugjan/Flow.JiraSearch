@@ -15,7 +15,7 @@ public class Main : IAsyncPlugin, ISettingProvider
     {
         var serviceCollection = new ServiceCollection();
         var config = context.API.LoadSettingJsonStorage<PluginSettings>();
-        context.API.LogInfo(nameof(Main), config.BaseUrl);
+        context.API.LogDebug(nameof(Main), config.BaseUrl);
         serviceCollection.ConfigureServices(context, config);
         var serviceProvider = serviceCollection.BuildServiceProvider();
 

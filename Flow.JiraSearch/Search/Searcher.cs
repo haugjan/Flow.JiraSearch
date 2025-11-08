@@ -19,7 +19,7 @@ internal sealed class Searcher(
 {
     public async Task<List<Result>> QueryAsync(Query query, CancellationToken token)
     {
-        context.API.LogInfo(nameof(Searcher), $"Query: {query.Search}");
+        context.API.LogDebug(nameof(Searcher), $"Query: {query.Search}");
 
         if (string.IsNullOrWhiteSpace(query.Search))
             return CreateHints();
@@ -29,7 +29,7 @@ internal sealed class Searcher(
             settings.DefaultProjects,
             token
         );
-        context.API.LogInfo(nameof(Searcher), $"JQL: {jql}");
+        context.API.LogDebug(nameof(Searcher), $"JQL: {jql}");
 
         return await SearchAsync(jql, token);
     }
