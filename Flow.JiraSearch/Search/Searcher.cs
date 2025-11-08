@@ -63,7 +63,7 @@ internal sealed class Searcher(
         }
         catch (TaskCanceledException)
         {
-            // Typing continued → skip this request
+            // Typing continued - skip this request
             return new List<Result>();
         }
 
