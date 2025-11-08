@@ -26,7 +26,7 @@ public class TestHttpMessageHandler : HttpMessageHandler
         RequestCount++;
         LastRequest = request;
 
-        // Request Body lesen (falls vorhanden)
+        // Read request body (if present)
         if (request.Content != null)
         {
             LastRequestBody = await request.Content.ReadAsStringAsync(cancellationToken);
