@@ -21,7 +21,7 @@ public class IssueQueryBuilderTest
         "@me @john",
         "project IN (AAA, BBB) AND statusCategory != Done AND assignee IN (currentUser(), JOHN)"
     )]
-    [InlineData("@free", "project IN (AAA, BBB) AND statusCategory != Done AND assignee IS EMPTY")]
+    [InlineData("@?", "project IN (AAA, BBB) AND statusCategory != Done AND assignee IS EMPTY")]
     [InlineData(
         "+label1 +label2",
         "project IN (AAA, BBB) AND statusCategory != Done AND labels IN (label1, label2)"

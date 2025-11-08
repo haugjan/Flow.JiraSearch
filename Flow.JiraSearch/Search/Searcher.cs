@@ -19,7 +19,7 @@ internal sealed class Searcher(
 {
     public async Task<List<Result>> QueryAsync(Query query, CancellationToken token)
     {
-        context.API.LogInfo(nameof(Searcher), $"Query: {query.Search}");
+        context.API.LogDebug(nameof(Searcher), $"Query: {query.Search}");
 
         if (string.IsNullOrWhiteSpace(query.Search))
             return CreateHints();
@@ -29,7 +29,7 @@ internal sealed class Searcher(
             settings.DefaultProjects,
             token
         );
-        context.API.LogInfo(nameof(Searcher), $"JQL: {jql}");
+        context.API.LogDebug(nameof(Searcher), $"JQL: {jql}");
 
         return await SearchAsync(jql, token);
     }
@@ -39,8 +39,8 @@ internal sealed class Searcher(
         return
         [
             resultCreator.CreateHint(
-                "@me name",
-                "Assigned to me (@me) or to a specific person (name)"
+                "@me name @?",
+                "Assigned to me (@me), to a specific person (name) or not assigned (@?)"
             ),
             resultCreator.CreateHint(
                 "@reporter:me @reporter:name",
@@ -49,34 +49,37 @@ internal sealed class Searcher(
             resultCreator.CreateHint("@was:me @was:name", "Was assigned to me (@was:me) or name"),
             resultCreator.CreateHint("*", "All statuses"),
             resultCreator.CreateHint("!", "Completed issues"),
+            resultCreator.CreateHint("?", "In progress issues"),
             resultCreator.CreateHint("#ABC", "Project ABC"),
             resultCreator.CreateHint("+Label1", "Issues with label 'Label1'"),
         ];
     }
 
-    private async Task<List<Result>> SearchAsync(string jql, CancellationToken externalCt)
+    private async Task<List<Result>> SearchAsync(string jql, CancellationToken cancellationToken)
     {
+        try
+        {
+            await Task.Delay(300, cancellationToken);
+        }
+        catch (TaskCanceledException)
+        {
+            // Typing continued - skip this request
+            return new List<Result>();
+        }
+
         using var timeoutCts = new CancellationTokenSource(
             TimeSpan.FromSeconds(Math.Max(3, settings.Timeout.TotalSeconds))
         );
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            externalCt,
+            cancellationToken,
             timeoutCts.Token
         );
 
         var data = await issueSearch
-            .SearchJqlAsync(jql, settings.MaxResults + 1, linkedCts.Token)
+            .SearchJqlAsync(jql, settings.MaxResults, linkedCts.Token)
             .ConfigureAwait(false);
 
         var results = new List<Result>();
-
-        if (data == null || data.Issues.Count == 0)
-        {
-            results.Add(
-                resultCreator.CreateOpenInBrowserAction("No results. Open search in browser", jql)
-            );
-            return results;
-        }
 
         foreach (var issue in data.Issues.Take(settings.MaxResults))
         {
@@ -103,12 +106,17 @@ internal sealed class Searcher(
             );
         }
 
-        if (data.Issues.Count > settings.MaxResults)
-        {
+        if (data.Issues.Count == 0)
+            results.Add(
+                resultCreator.CreateOpenInBrowserAction(
+                    "No results. Open search in browser ...",
+                    jql
+                )
+            );
+        else
             results.Add(
                 resultCreator.CreateOpenInBrowserAction("More results in browser ...", jql)
             );
-        }
 
         return results;
     }

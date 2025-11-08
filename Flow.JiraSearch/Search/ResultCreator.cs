@@ -47,17 +47,6 @@ internal class ResultCreator(PluginSettings settings) : IResultCreator
             CopyText = copyText,
         };
 
-    private static ImageSource LoadImageFromUrl(string url)
-    {
-        var bitmap = new BitmapImage();
-        bitmap.BeginInit();
-        bitmap.UriSource = new Uri(url);
-        bitmap.CacheOption = BitmapCacheOption.OnDemand;
-        bitmap.EndInit();
-        bitmap.Freeze();
-        return bitmap;
-    }
-
     public Result CreateHint(string title, string sub) =>
         new()
         {
