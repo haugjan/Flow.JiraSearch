@@ -39,8 +39,8 @@ internal sealed class Searcher(
         return
         [
             resultCreator.CreateHint(
-                "@me name",
-                "Assigned to me (@me) or to a specific person (name)"
+                "@me name @?",
+                "Assigned to me (@me), to a specific person (name) or not assigned (@?)"
             ),
             resultCreator.CreateHint(
                 "@reporter:me @reporter:name",
@@ -49,6 +49,7 @@ internal sealed class Searcher(
             resultCreator.CreateHint("@was:me @was:name", "Was assigned to me (@was:me) or name"),
             resultCreator.CreateHint("*", "All statuses"),
             resultCreator.CreateHint("!", "Completed issues"),
+            resultCreator.CreateHint("?", "In progress issues"),
             resultCreator.CreateHint("#ABC", "Project ABC"),
             resultCreator.CreateHint("+Label1", "Issues with label 'Label1'"),
         ];

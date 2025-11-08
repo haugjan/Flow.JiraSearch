@@ -28,10 +28,12 @@ internal class IssueQueryBuilder(IUserSearchClient userSearchClient) : IIssueQue
             .Else(projects.Count > 0 ? $"project IN ({string.Join(", ", projects)})" : string.Empty)
             .When("\\!")
             .Then("statusCategory = Done")
+            .When("\\?")
+            .Then("statusCategory = \"In Progress\"")
             .When("\\*")
             .ThenDoNothing() // tut nichts, aber resetet den Match-State
             .Else("statusCategory != Done")
-            .When("@free")
+            .When(@"@\?")
             .Then("assignee IS EMPTY")
             .When("@me")
             .ThenRemember("currentUser()")
