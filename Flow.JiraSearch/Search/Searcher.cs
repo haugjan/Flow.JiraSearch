@@ -55,13 +55,23 @@ internal sealed class Searcher(
         ];
     }
 
-    private async Task<List<Result>> SearchAsync(string jql, CancellationToken externalCt)
+    private async Task<List<Result>> SearchAsync(string jql, CancellationToken cancellationToken)
     {
+        try
+        {
+            await Task.Delay(300, cancellationToken);
+        }
+        catch (TaskCanceledException)
+        {
+            // Typing continued → skip this request
+            return new List<Result>();
+        }
+
         using var timeoutCts = new CancellationTokenSource(
             TimeSpan.FromSeconds(Math.Max(3, settings.Timeout.TotalSeconds))
         );
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            externalCt,
+            cancellationToken,
             timeoutCts.Token
         );
 
