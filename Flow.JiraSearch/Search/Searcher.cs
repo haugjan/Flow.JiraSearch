@@ -76,18 +76,10 @@ internal sealed class Searcher(
         );
 
         var data = await issueSearch
-            .SearchJqlAsync(jql, settings.MaxResults + 1, linkedCts.Token)
+            .SearchJqlAsync(jql, settings.MaxResults, linkedCts.Token)
             .ConfigureAwait(false);
 
         var results = new List<Result>();
-
-        if (data == null || data.Issues.Count == 0)
-        {
-            results.Add(
-                resultCreator.CreateOpenInBrowserAction("No results. Open search in browser", jql)
-            );
-            return results;
-        }
 
         foreach (var issue in data.Issues.Take(settings.MaxResults))
         {
@@ -114,12 +106,17 @@ internal sealed class Searcher(
             );
         }
 
-        if (data.Issues.Count > settings.MaxResults)
-        {
+        if (data.Issues.Count == 0)
+            results.Add(
+                resultCreator.CreateOpenInBrowserAction(
+                    "No results. Open search in browser ...",
+                    jql
+                )
+            );
+        else
             results.Add(
                 resultCreator.CreateOpenInBrowserAction("More results in browser ...", jql)
             );
-        }
 
         return results;
     }
