@@ -71,40 +71,57 @@ The plugin is configured through Flow Launcher's settings interface:
 ## Usage
 
 ### User-based Search
-Open Flow Launcher (`Alt + Space`) and use the `jira` keyword with these patterns:
+Open Flow Launcher (`Alt + Space`) and use the `jira` keyword with these user-focused operators. Combine operators freely with project (`#project`), labels (`+label`) and status controls (`*`, `!`).
 
-**Current Assignee:**
-```
+- `@me` — Issues currently assigned to the signed-in user.
+
+```text
 jira @me
 ```
-Find issues assigned to me
 
-```
+- `@username` — Issues currently assigned to the specified user (use plain name token, e.g. `@john`). The plugin attempts to resolve the name via Jira user search.
+
+```text
 jira @john
 ```
-Find issues assigned to john
 
-**Reporter Search:**
-```
+- `@reporter:me` — Issues where you are the reporter.
+
+```text
 jira @reporter:me
 ```
-Find issues reported by me
 
-```
+- `@reporter:username` — Issues reported by a specific person.
+
+```text
 jira @reporter:john
 ```
-Find issues reported by john
 
-**Previous Assignee:**
-```
+- `@was:me` — Issues that were previously assigned to you (assignee WAS you).
+
+```text
 jira @was:me
 ```
-Find issues that were previously assigned to me
 
-```
+- `@was:username` — Issues that were previously assigned to a specific user.
+
+```text
 jira @was:john
 ```
-Find issues that were previously assigned to john
+
+- `@?` — Unassigned issues (no current assignee).
+
+```text
+jira @?
+```
+
+Examples combining user operators with other tokens:
+
+```text
+jira #sup @me +critical     # my critical issues in SUP
+jira @reporter:john ! +bugfix  # closed issues reported by John with label bugfix
+jira @was:me authentication    # issues that were once mine containing "authentication"
+```
 
 ### Project-based Search
 
@@ -184,20 +201,31 @@ If you configure default projects in the settings, searches will automatically b
 
 ## Search Operators Reference
 
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `@me` | Issues assigned to current user | `jira @me` |
-| `@username` | Issues assigned to specific user | `jira @john` |
-| `@reporter:me` | Issues reported by current user | `jira @reporter:me` |
-| `@reporter:username` | Issues reported by specific user | `jira @reporter:alice` |
-| `@was:me` | Issues previously assigned to current user | `jira @was:me` |
-| `@was:username` | Issues previously assigned to specific user | `jira @was:bob` |
-| `#projectkey` | Issues from specific project | `jira #web` |
-| `#all` | Search all projects | `jira #all` |
-| `+labelname` | Issues with specific label | `jira +urgent` |
-| `*` | All statuses (default: open only) | `jira * bug` |
-| `!` | Only closed/completed issues | `jira ! security` |
-| `ABC-123` | Search by issue key | `jira PROJECT-456` |
+Below is a compact reference of the query operators supported by the plugin. Combine operators freely in a single query (for example: `jira #sup @me +critical`). If `Default Projects` is set in the plugin settings, queries without an explicit `#project` or `#all` are limited to those projects.
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `@me` | Issues currently assigned to the signed-in user | `jira @me` |
+| `@username` | Issues currently assigned to the named user (e.g. `@john`). The plugin will attempt to resolve the name via Jira user search and use matching account IDs. | `jira @john` |
+| `@reporter:me` | Issues where the signed-in user is the reporter | `jira @reporter:me` |
+| `@reporter:username` | Issues reported by the specified user | `jira @reporter:alice` |
+| `@was:me` | Issues that were previously assigned to the signed-in user (`assignee WAS`) | `jira @was:me` |
+| `@was:username` | Issues that were previously assigned to the specified user | `jira @was:bob` |
+| `@?` | Unassigned issues (no current assignee) | `jira @?` |
+| `#projectkey` | Restrict search to a specific project (project key, e.g. `#sup`) | `jira #sup` |
+| `#all` | Search across all projects (overrides `Default Projects`) | `jira #all` |
+| `+labelname` | Require a label; use multiple `+label` tokens to require multiple labels | `jira +bug +urgent` |
+| `*` | Include all statuses (open and closed). By default closed/Done issues are excluded. | `jira *` |
+| `!` | Only closed/completed issues (status category Done) | `jira !` |
+| `PROJECT-123` | Exact issue key lookup | `jira WEB-456` |
+| free text | Any other words are used as text search (summary OR text) | `jira authentication login`
+
+Notes:
+
+- Order does not matter; tokens are combined into a JQL query by the query builder.
+- Username tokens support letters and hyphens; the user search may return multiple account IDs — the plugin will use matched account IDs (limited to a small number) when resolving a name.
+- Use `#all` when you want to ignore `Default Projects` and search globally.
+- Combine status operators with other tokens: `!` restricts to closed issues, whereas `*` keeps every status.
 
 ## Troubleshooting
 
