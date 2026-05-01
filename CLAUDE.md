@@ -123,8 +123,9 @@ there.
   frameworks.
 - Code style follows the default .NET conventions; primary constructors are
   used throughout for DI (e.g. `Searcher(...)`, `IssueQueryBuilder(...)`).
-- The plugin GUID in `plugin.json` (`BD32A62C-…`) matches the one in
-  `Build-Plugin.ps1` — keep them in sync if either is changed.
+- `Build-Plugin.ps1` and `Start.ps1` derive the plugin id, version, and
+  folder name from `plugin.json` at runtime — don't add hard-coded versions
+  when extending those scripts.
 
 ## Branch naming
 
@@ -132,12 +133,3 @@ The global `feature/firefly/OPA-…` / `hotfix/firefly/SUP-…` rules in
 `~/.claude/CLAUDE.md` are scoped to firefly work and do **not** apply to
 this personal repo. Use short `feature/<topic>` or `fix/<topic>` branch
 names. Commit subjects are plain imperative sentences with no ticket prefix.
-
-## Known wrinkles
-
-- `Build-Plugin.ps1` hardcodes the ZIP version (`v1.1.0`) while
-  `plugin.json:Version` has moved on. Locally built ZIPs are misnamed.
-- `Start.ps1` hardcodes the plugin folder name (`Jira Search-1.1.0`) and
-  no longer matches the folder Flow Launcher creates after installing a
-  newer version — local debug builds land in the wrong directory unless
-  `-PluginFolderName` is passed explicitly.

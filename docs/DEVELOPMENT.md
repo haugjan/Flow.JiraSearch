@@ -51,14 +51,10 @@ The script:
 2. Runs `dotnet build` (Debug by default; pass `-BuildConfig Release` to
    switch).
 3. Copies `bin\Debug\net9.0-windows\*` into
-   `%APPDATA%\FlowLauncher\Plugins\Jira Search-1.1.0`.
+   `%APPDATA%\FlowLauncher\Plugins\<Name>-<Version>`. The `<Name>` and
+   `<Version>` come from `plugin.json` automatically; pass
+   `-PluginFolderName` to override.
 4. Restarts `%LOCALAPPDATA%\FlowLauncher\Flow.Launcher.exe`.
-
-> The default plugin folder name embeds the version (`1.1.0`) and is now
-> stale — the manifest is at `1.2.0`. After Flow Launcher first installs
-> `1.2.0`, it creates a new folder and `Start.ps1` keeps writing to the
-> old one. Either pass `-PluginFolderName "Jira Search-1.2.0"` or update
-> the script default; see the heads-up below.
 
 ## Producing a release ZIP
 
@@ -85,25 +81,8 @@ ZIP can be installed via Flow Launcher → Settings → Plugins → Install Plug
 The single source of truth for the plugin version is the `Version` field in
 `Flow.JiraSearch/plugin.json`. Bump it before merging a release-worthy
 change. The publish workflow tags `v<Version>` and uploads the ZIP under
-that name.
-
-## Known wrinkles in the build tooling
-
-These don't affect the plugin at runtime, just the build/dev/release
-tooling. Worth fixing the next time the relevant script is touched.
-
-1. **`Build-Plugin.ps1` hardcodes the ZIP version.** The line
-   `$ZipFileName = "$PluginName-v1.1.0.zip"` is out of sync with
-   `plugin.json:Version`. Fix:
-   ```powershell
-   $pluginVersion = (Get-Content plugin.json -Raw | ConvertFrom-Json).Version
-   $ZipFileName   = "$PluginName-v$pluginVersion.zip"
-   ```
-2. **`Start.ps1` hardcodes the plugin folder name.** Same root cause —
-   `Jira Search-1.1.0` no longer matches the version Flow Launcher creates
-   on a fresh install of newer versions. Either derive `Name + Version`
-   from `plugin.json` or pass `-PluginFolderName` at the call site each
-   time the version changes.
+that name. `Build-Plugin.ps1` and `Start.ps1` read `plugin.json` at runtime
+for the version and id, so a single bump propagates everywhere.
 
 ## Code conventions
 
