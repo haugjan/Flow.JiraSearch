@@ -15,8 +15,7 @@ Search for and open Jira issues directly from Flow Launcher.
 
 ## Requirements
 
-- Flow Launcher 1.15.0 or higher
-- .NET 9.0 Runtime
+- **Flow Launcher 2.0.0 or higher.** The plugin targets .NET 9, which is the runtime bundled with Flow Launcher 2.x. Flow Launcher 1.x ships .NET 7 and cannot load this plugin (you will see a `Could not load file or assembly 'System.Runtime, Version=9.0.0.0'` error in the Flow Launcher logs).
 - Valid Jira account with API access
 
 ## Installation
