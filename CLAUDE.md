@@ -2,12 +2,9 @@
 
 ## Documentation
 
-Developer documentation lives in [`docs/`](docs/README.md). Read the index there first; it links to:
+Developer documentation lives in [`docs/`](docs/):
 
-- [Architecture](docs/architecture.md) — plugin layout, runtime composition, and the custom JQL DSL.
-- [Development](docs/development.md) — build, test, and live dev-loop workflow.
-- [Release process](docs/release-process.md) — how `plugin.json:Version` drives auto-release.
-- [Known issues](docs/known-issues.md) — current build/release tooling inconsistencies worth fixing.
+- [Architecture](docs/ARCHITECTURE.md) — solution layout, request lifecycle, DI wiring, and the custom JQL DSL.
 
 End-user documentation (installation, configuration, search-operator reference) lives in the [top-level README](README.md).
 
