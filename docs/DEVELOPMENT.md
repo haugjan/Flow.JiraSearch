@@ -75,17 +75,10 @@ ZIP can be installed via Flow Launcher → Settings → Plugins → Install Plug
 - `.github/workflows/build-action.yml` — builds every PR via
   `dotnet publish ... -r win-x64 --no-self-contained` and uploads the result
   as a 14-day artifact named `JiraSearch-<version>`.
-- `.github/workflows/publish-action.yml` — on push, reads `Version` from
-  `Flow.JiraSearch/plugin.json`, compares it against the latest GitHub
-  release tag (stripping `v`), and if they differ, publishes a Release
-  named `v<Version>` with the `JiraSearch-<Version>.zip` attached.
-
-> **Heads-up:** the publish workflow's `on: push:` is currently configured
-> for the `master` branch, while the repo's default branch is `main`.
-> Pushes to `main` therefore do not trigger a release; bumping
-> `plugin.json` Version on `main` has no effect until the trigger is
-> updated to include `main`. Until that's fixed, releases must be triggered
-> manually via the **workflow_dispatch** button in the Actions tab.
+- `.github/workflows/publish-action.yml` — on push to `main`, reads
+  `Version` from `Flow.JiraSearch/plugin.json`, compares it against the
+  latest GitHub release tag (stripping `v`), and if they differ, publishes
+  a Release named `v<Version>` with the `JiraSearch-<Version>.zip` attached.
 
 ## Versioning
 
@@ -101,17 +94,16 @@ tooling. Worth fixing the next time the relevant script is touched.
 
 1. **`Build-Plugin.ps1` hardcodes the ZIP version.** The line
    `$ZipFileName = "$PluginName-v1.1.0.zip"` is out of sync with
-   `plugin.json:Version` (currently `1.2.0`). Fix:
+   `plugin.json:Version`. Fix:
    ```powershell
    $pluginVersion = (Get-Content plugin.json -Raw | ConvertFrom-Json).Version
    $ZipFileName   = "$PluginName-v$pluginVersion.zip"
    ```
 2. **`Start.ps1` hardcodes the plugin folder name.** Same root cause —
    `Jira Search-1.1.0` no longer matches the version Flow Launcher creates
-   on a fresh install of `1.2.0`. Either derive `Name + Version` from
-   `plugin.json` or pass `-PluginFolderName` at the call site each time
-   the version changes.
-3. **Publish workflow listens on `master`.** See above.
+   on a fresh install of newer versions. Either derive `Name + Version`
+   from `plugin.json` or pass `-PluginFolderName` at the call site each
+   time the version changes.
 
 ## Code conventions
 
