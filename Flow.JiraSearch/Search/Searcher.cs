@@ -1,4 +1,5 @@
-﻿using Flow.JiraSearch.JiraClient;
+﻿using System.Net.Http;
+using Flow.JiraSearch.JiraClient;
 using Flow.JiraSearch.Settings;
 using Flow.Launcher.Plugin;
 
@@ -75,9 +76,27 @@ internal sealed class Searcher(
             timeoutCts.Token
         );
 
-        var data = await issueSearch
-            .SearchJqlAsync(jql, settings.MaxResults, linkedCts.Token)
-            .ConfigureAwait(false);
+        IssueResponse? data;
+        try
+        {
+            data = await issueSearch
+                .SearchJqlAsync(jql, settings.MaxResults, linkedCts.Token)
+                .ConfigureAwait(false);
+        }
+        catch (HttpRequestException ex)
+            when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            context.API.LogException(nameof(Searcher), "Jira authentication failed", ex);
+            return [resultCreator.CreateAuthError()];
+        }
+        catch (HttpRequestException ex)
+        {
+            context.API.LogException(nameof(Searcher), "Jira request failed", ex);
+            return [resultCreator.CreateApiError(ex.StatusCode, ex.Message)];
+        }
+
+        if (data is null)
+            return [resultCreator.CreateApiError(null, "Empty response from Jira.")];
 
         var results = new List<Result>();
 

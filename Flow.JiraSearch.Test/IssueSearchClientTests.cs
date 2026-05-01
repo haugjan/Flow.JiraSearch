@@ -123,7 +123,10 @@ public class IssueSearchClientTests : IDisposable
         ShouldBeTestExtensions.ShouldBe(request.Method, HttpMethod.Post);
 
         ShouldBeNullExtensions.ShouldNotBeNull<Uri>(request.RequestUri);
-        ShouldBeStringTestExtensions.ShouldBe(request.RequestUri.ToString(), "https://test.atlassian.net/rest/api/2/search/jql");
+        ShouldBeStringTestExtensions.ShouldBe(
+            request.RequestUri.ToString(),
+            "https://test.atlassian.net/rest/api/2/search/jql"
+        );
 
         var requestBody = _httpMessageHandler.LastRequestBody;
         ShouldBeNullExtensions.ShouldNotBeNull<string>(requestBody);
@@ -151,7 +154,7 @@ public class IssueSearchClientTests : IDisposable
     }
 
     [Fact]
-    public async Task SearchJqlAsync_WithHttpError_ReturnsNull()
+    public async Task SearchJqlAsync_WithHttpError_ThrowsHttpRequestExceptionCarryingStatusCode()
     {
         // Arrange
         const string jql = "project = INVALID";
@@ -160,11 +163,24 @@ public class IssueSearchClientTests : IDisposable
 
         _httpMessageHandler.SetResponse(HttpStatusCode.BadRequest, "Bad Request");
 
-        // Act
-        var result = await _sut.SearchJqlAsync(jql, maxResults, cancellationToken);
+        // Act & Assert
+        var ex = await Should.ThrowAsync<HttpRequestException>(() =>
+            _sut.SearchJqlAsync(jql, maxResults, cancellationToken)
+        );
+        ex.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
 
-        // Assert
-        result.ShouldBeNull();
+    [Fact]
+    public async Task SearchJqlAsync_WithUnauthorized_ThrowsHttpRequestExceptionWith401()
+    {
+        // Arrange
+        _httpMessageHandler.SetResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+
+        // Act & Assert
+        var ex = await Should.ThrowAsync<HttpRequestException>(() =>
+            _sut.SearchJqlAsync("project = TEST", 10, CancellationToken.None)
+        );
+        ex.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Flow.JiraSearch.Settings;
@@ -21,6 +22,8 @@ internal interface IResultCreator
 
     Result CreateHint(string title, string sub);
     Result CreateOpenInBrowserAction(string title, string jql);
+    Result CreateAuthError();
+    Result CreateApiError(HttpStatusCode? status, string message);
 }
 
 internal class ResultCreator(PluginSettings settings) : IResultCreator
@@ -67,6 +70,28 @@ internal class ResultCreator(PluginSettings settings) : IResultCreator
                 var url = $"{settings.BaseUrl}/issues/?jql={Uri.EscapeDataString(jql)}";
                 return Open(url);
             },
+        };
+
+    public Result CreateAuthError() =>
+        new()
+        {
+            Title = "Jira authentication failed (HTTP 401)",
+            SubTitle =
+                "Did you paste the API Token as 'your-email@example.com:apitoken'? "
+                + "Click for setup help.",
+            IcoPath = "Images/gray.png",
+            Action = _ => Open("https://github.com/haugjan/Flow.JiraSearch#configuration"),
+        };
+
+    public Result CreateApiError(HttpStatusCode? status, string message) =>
+        new()
+        {
+            Title = status.HasValue
+                ? $"Jira request failed (HTTP {(int)status.Value} {status.Value})"
+                : "Jira request failed",
+            SubTitle = message,
+            IcoPath = "Images/gray.png",
+            Action = _ => false,
         };
 
     private bool Open(string url)

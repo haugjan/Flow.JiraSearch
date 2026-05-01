@@ -26,10 +26,7 @@ internal sealed class IssueSearchClient(Func<HttpClient> httpFactory) : IIssueSe
         req.Content = JsonContent.Create(body);
         using var http = httpFactory();
         using var resp = await http.SendAsync(req, ct).ConfigureAwait(false);
-        if (!resp.IsSuccessStatusCode)
-        {
-            return null;
-        }
+        resp.EnsureSuccessStatusCode();
         return await resp
             .Content.ReadFromJsonAsync<IssueResponse>(cancellationToken: ct)
             .ConfigureAwait(false);
