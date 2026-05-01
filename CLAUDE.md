@@ -39,7 +39,7 @@ For deeper docs see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
 - `.github/workflows/`
   - `build-action.yml` — PR build (`dotnet publish` win-x64, uploads
     artifact `JiraSearch-<version>`)
-  - `publish-action.yml` — release on push to `master`, tags `v<plugin.json
+  - `publish-action.yml` — release on push to `main`, tags `v<plugin.json
     Version>`, attaches the published ZIP
 
 ## Build & test
@@ -57,7 +57,7 @@ into the plugin folder and relaunches.
 For producing an installable ZIP, run `Flow.JiraSearch\Build-Plugin.ps1`.
 
 The publish workflow tags releases from the `Version` field in
-`Flow.JiraSearch/plugin.json` — bumping that field on `master` is what
+`Flow.JiraSearch/plugin.json` — bumping that field on `main` is what
 triggers a new GitHub release.
 
 ## Query language (handled by `IssueQueryBuilder`)
@@ -135,13 +135,9 @@ names. Commit subjects are plain imperative sentences with no ticket prefix.
 
 ## Known wrinkles
 
-- The CI publish workflow listens on `master`, but the default branch is
-  `main`. Pushes to `main` therefore won't currently trigger a release —
-  fix the trigger before depending on it. Until then, releases must be
-  triggered via `workflow_dispatch`.
 - `Build-Plugin.ps1` hardcodes the ZIP version (`v1.1.0`) while
-  `plugin.json:Version` is `1.2.0`. Locally built ZIPs are misnamed.
+  `plugin.json:Version` has moved on. Locally built ZIPs are misnamed.
 - `Start.ps1` hardcodes the plugin folder name (`Jira Search-1.1.0`) and
-  no longer matches the folder Flow Launcher creates after installing
-  `1.2.0` — local debug builds land in the wrong directory unless
+  no longer matches the folder Flow Launcher creates after installing a
+  newer version — local debug builds land in the wrong directory unless
   `-PluginFolderName` is passed explicitly.
